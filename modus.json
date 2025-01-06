@@ -6,5 +6,34 @@
       "path": "/graphql",
       "auth": "bearer-token"
     }
+  },
+  "connections": {
+    "semanticscholar": {
+      "type": "http",
+      "baseUrl": "https://api.semanticscholar.org/"
+    },
+    "arxiv": {
+      "type": "http",
+      "baseUrl": "https://export.arxiv.org/"
+    },
+    "deepseek": {
+      "type": "http",
+      "baseUrl": "https://api.deepseek.com/",
+      "headers": {
+        "Authorization": "Bearer {{AUTH_TOKEN}}"
+      }
+    }
+  },
+  "models": {
+    "text-generator": {
+      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "provider": "hugging-face",
+      "connection": "hypermode"
+    },
+    "deepseek": {
+      "sourceModel": "deepseek-chat",
+      "connection": "deepseek",
+      "path": "chat/completions"
+    }
   }
 }
