@@ -25,7 +25,7 @@
     },
     "neo4j": {
       "type": "neo4j",
-      "dbUri": "{{NEO4J_URI}}",
+      "dbUri": "neo4j+s://d4b234ed.databases.neo4j.io",
       "username": "{{USERNAME}}",
       "password": "{{PASSWORD}}"
     }
