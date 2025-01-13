@@ -82,3 +82,14 @@ export class PaperObject {
   }
 }
 
+/**
+ * Represents a project with citations.
+ */
+@json
+export class ProjectWithCitations {
+  id: string = "";
+  title: string = "";
+  keywords: string = "";
+  citationCount: i32 = 0;
+  citations: Array<SimplifiedPaper> = new Array<SimplifiedPaper>();
+}

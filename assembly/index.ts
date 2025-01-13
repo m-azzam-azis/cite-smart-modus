@@ -9,6 +9,7 @@ import {
   PaperSearchInput,
   PaperSearchResponse,
   PaperObject,
+  ProjectWithCitations,
 } from "./types";
 import { EmbeddingsModel } from "@hypermode/modus-sdk-as/models/experimental/embeddings";
 import {
@@ -152,7 +153,9 @@ export function searchAndStorePapers(
 }
 
 // New endpoint to fetch all projects for a given user ID using streaming
-export function getProjectsByUserId(userId: string): PaperObject[] | null {
+export function getProjectsByUserId(
+  userId: string,
+): ProjectWithCitations[] | null {
   const vars = new neo4j.Variables();
   vars.set("userId", userId);
 
@@ -169,32 +172,43 @@ export function getProjectsByUserId(userId: string): PaperObject[] | null {
       id: elementId(p),
       title: p.title,
       keywords: p.keywords,
+      citationCount: SIZE(citations),
       citations: citations
     }) AS projects
   `;
 
   const result = neo4j.executeQuery("neo4j", query, vars);
-  let projects: PaperObject[] = [];
+  let projects: ProjectWithCitations[] = [];
 
   if (result.Records.length > 0) {
     const recordResults = result.Records[0].get("projects");
-    projects = JSON.parse<PaperObject[]>(recordResults);
+    projects = JSON.parse<ProjectWithCitations[]>(recordResults);
   }
 
   return projects;
 }
 
 // Function to search for a specific project by its ID
-export function getProjectById(projectId: string): PaperObject | null {
+export function getProjectById(projectId: string): ProjectWithCitations | null {
   const vars = new neo4j.Variables();
   vars.set("projectId", projectId);
 
   const query = `
-    MATCH (p:Search {projectId: $projectId})
+    MATCH (p:Search)
+    WHERE elementId(p) = $projectId
+    OPTIONAL MATCH (p)-[r:RELATED_TO]->(citation:Paper)
+    WITH p, COLLECT({
+      id: citation.id,
+      title: citation.title,
+      authors: citation.authors,
+      similarityScore: r.similarityScore
+    }) AS citations
     RETURN {
       id: elementId(p),
       title: p.title,
-      keywords: p.keywords
+      keywords: p.keywords,
+      citationCount: SIZE(citations),
+      citations: citations
     } AS project
   `;
 
@@ -202,7 +216,7 @@ export function getProjectById(projectId: string): PaperObject | null {
 
   if (result.Records.length > 0) {
     const recordResults = result.Records[0].get("project");
-    const project = JSON.parse<PaperObject>(recordResults);
+    const project = JSON.parse<ProjectWithCitations>(recordResults);
     return project;
   }
 
@@ -322,6 +336,7 @@ RESPONSE GUIDELINES:
 - Include links or references when available to enrich the response.
 - Avoid overly technical jargon unless the user specifies expertise.
 - When context or citation data is insufficient, politely inform the user (e.g., "I couldn’t find enough data on this citation. Could you provide more details?").
+- Your response should be in a markdown format for easy readability.
 
 EXAMPLES OF ON-TOPIC QUESTIONS:
 - "What are the key findings of the paper titled 'Advances in AI Citation Networks'?"
