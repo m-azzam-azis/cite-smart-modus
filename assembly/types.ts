@@ -41,4 +41,44 @@ export class SimplifiedPaper {
   title: string = "";
   id: string = "";
   authors: Array<string> = new Array<string>();
+  similarityScore: f32 = 0.0;
 }
+
+/**
+ * Represents the input for the new feature.
+ */
+@json
+export class PaperSearchInput {
+  uid: string = "";
+  title: string = "";
+  keywords: Array<string> = new Array<string>();
+}
+
+/**
+ * Represents the response for the new feature.
+ */
+@json
+export class PaperSearchResponse {
+  title: string = "";
+  citations: Array<SimplifiedPaper> = new Array<SimplifiedPaper>();
+  similarityScore: f32 = 0.0;
+}
+
+/**
+ * Define a type for the paper objects to be used in Neo4j
+ */
+@json
+export class PaperObject {
+  id: string;
+  title: string;
+  authors: string;
+  citations: Array<SimplifiedPaper>; // Add this line
+
+  constructor(id: string, title: string, authors: string) {
+    this.id = id;
+    this.title = title;
+    this.authors = authors;
+    this.citations = new Array<SimplifiedPaper>(); // Initialize citations
+  }
+}
+
